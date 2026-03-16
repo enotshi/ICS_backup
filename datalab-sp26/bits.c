@@ -159,7 +159,7 @@ NOTES:
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+    return (1<<31);
 }
 /* 
  * upperBits - pads n upper bits with 1's
@@ -170,7 +170,9 @@ int tmin(void) {
  *  Rating: 1
  */
 int upperBits(int n) {
-  return 2;
+    int num = (!(!n))<<31;
+    int move = n +(~0);
+    return (num >> move);
 }
 // Rating 2
 /* 
@@ -182,11 +184,14 @@ int upperBits(int n) {
  *  Rating: 2
  */
 int sign(int x) {
-    return 2;
+    int zero = !(!x);
+    int neg = (x >> 31);
+    int sgn = zero + (neg<<1) ;
+    return sgn;
 }
 /* 
 
- * copyBit(x,n) - set all bits of result to bit n of x
+ * copyBit(x,n) - set all bits of re sult to bit n of x
 
  *   Bits numbered from 0 (LSB) to 31 (MSB)
 
@@ -200,7 +205,10 @@ int sign(int x) {
 
  */
 int copyBit(int x, int n) {
-  return 2;
+    int comp = (1 << n);
+    int get = (comp & x);
+    get = (!(!get));
+    return ((get << 31) >> 31); 
 }
 /* 
  * fitsBits - return 1 if x can be represented as an 
@@ -212,7 +220,10 @@ int copyBit(int x, int n) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+    int move = n+(~0);
+    int lft = (x >> move);
+    int rslt = ((!lft)|(!(lft+1)));
+   return rslt;
 }
 /* 
  * anyOddBit - return 1 if any odd-numbered bit in word set to 1
@@ -223,7 +234,13 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int anyOddBit(int x) {
-    return 2;
+    int g7_0 = (x & 170);
+    int g15_8 = (x >> 8) & 170;
+    int g23_16 = (x >> 16) & 170;
+    int g31_24 = (x >> 24) & 170;
+    int rslt =  g7_0 | g15_8 | g23_16 | g31_24;
+    //cout << !(!rslt) << endl;
+    return !(!rslt);
 }
 /*
  * distinctNegation - returns 1 if x != -x.
@@ -233,7 +250,8 @@ int anyOddBit(int x) {
  *   Rating: 2
  */
 int distinctNegation(int x) {
-  return 2;
+   int _x = ~x+1;
+  return !!(x^_x);
 }
 // Rating 3
 /* 
@@ -244,7 +262,11 @@ int distinctNegation(int x) {
  *   Rating: 3
  */
 int isGreater(int x, int y) {
-  return 2;
+    int x_1 = x >> 31, y_1 = y >> 31;
+    //int nx_min = !!(x^(1<<31));
+    int xy_p = !((x+(~y)) >> 31);
+    //cout << (((x_1 ^ y_1) & (!x_1)) | ((!(x_1^y_1)) & xy_p)) << endl;
+    return (((x_1 ^ y_1) & (!x_1)) | ((!(x_1^y_1)) & xy_p));
 }
 /* 
  * isAbsEqual - return 1 if |x| == |y|, and 0 otherwise 
@@ -254,7 +276,8 @@ int isGreater(int x, int y) {
  *   Rating: 3
  */
 int isAbsEqual(int x, int y) {
-    return 2;
+    int rslt = !!((!(x^y)) + (!(x+y)));
+    return rslt;
 }
 // Rating 4
 /* howManyBits - return the minimum number of bits required to represent x in
@@ -270,5 +293,20 @@ int isAbsEqual(int x, int y) {
  *  Rating: 4
  */
 int howManyBits(int x) {
-  return 0;
+    int aftmv = x >> 15;
+    int cant = !((!aftmv)|(!(aftmv+1)));
+    int sum = ((~cant)+1)&16;
+    aftmv = x >> (sum+7);
+    cant = !((!aftmv)|(!(aftmv+1)));
+    sum = (((~cant)+1)&8) + sum;
+    aftmv = x >> (sum+3);
+    cant = !((!aftmv)|(!(aftmv+1)));
+    sum = (((~cant)+1)&4) + sum;
+    aftmv = x >> (sum+1);
+    cant = !((!aftmv)|(!(aftmv+1)));
+    sum = (((~cant)+1)&2) + sum;
+    aftmv = x >> (sum+0);
+    cant = !((!aftmv)|(!(aftmv+1)));
+    sum = (((~cant)+1)&1) + sum;
+    return sum+1;
 }
